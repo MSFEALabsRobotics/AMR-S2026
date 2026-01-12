@@ -1,4 +1,4 @@
-# Lab Schedule Topics
+# Lab Milestones
 
 ## 1) Using a simulator (Gazebo)
 
