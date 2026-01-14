@@ -65,6 +65,8 @@
 </sdf>
 
 ```
+<img width="596" height="443" alt="image" src="https://github.com/user-attachments/assets/9f903cff-3ef0-4e69-af4a-dd78f68d30d2" />
+<img width="822" height="690" alt="image" src="https://github.com/user-attachments/assets/d53993b5-3a4a-4ff2-8f58-fc8101356281" />
 
 # 1)  and Add NEW MODEL (The ROBOT)
 
