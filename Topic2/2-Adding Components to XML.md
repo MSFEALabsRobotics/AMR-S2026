@@ -1,237 +1,260 @@
+# 1) Add NEW MODEL (The ROBOTS)
 
-# 1 Add NEW MODEL (The ROBOTS)
-
+```xml
 <model name='vehicle_blue' canonical_link='chassis'>
-    <pose relative_to='world'>0 0 0 0 0 0</pose>
+  <pose relative_to='world'>0 0 0 0 0 0</pose>
+```
 
+---
 
-# 2 Add first Link inside CHASSIS
-    <link name='chassis'>
-        <pose relative_to='__model__'>0.5 0 0.4 0 0 0</pose>
+# 2) Add first Link inside `CHASSIS`
 
+```xml
+  <link name='chassis'>
+    <pose relative_to='__model__'>0.5 0 0.4 0 0 0</pose>
+```
 
-# 3 Add Inertial properties to the link (How link behaves with physics)
-   <inertial> <!--inertial properties of the link mass, inertia matix-->
-        <mass>1.14395</mass>
-        <inertia>
-            <ixx>0.095329</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.381317</iyy>
-            <iyz>0</iyz>
-            <izz>0.476646</izz>
-        </inertia>
+---
+
+# 3) Add Inertial properties to the link (How link behaves with physics)
+
+```xml
+    <inertial> <!--inertial properties of the link mass, inertia matix-->
+      <mass>1.14395</mass>
+      <inertia>
+        <ixx>0.095329</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>0.381317</iyy>
+        <iyz>0</iyz>
+        <izz>0.476646</izz>
+      </inertia>
     </inertial>
+```
 
+---
 
+# 4) Add VISUAL (how link appears) + COLLISION (physical dimensions used)
 
-# 3 Add VISUAL (how link appears) COLLISION (How link physical dimensions are used)
+```xml
     <visual name='visual'>
-        <geometry>
-            <box>
-                <size>2.0 1.0 0.5</size>
-            </box>
-        </geometry>
-        <!--let's add color to our link-->
-        <material>
-            <ambient>0.0 0.0 1.0 1</ambient>
-            <diffuse>0.0 0.0 1.0 1</diffuse>
-            <specular>0.0 0.0 1.0 1</specular>
-        </material>
+      <geometry>
+        <box>
+          <size>2.0 1.0 0.5</size>
+        </box>
+      </geometry>
+      <!--let's add color to our link-->
+      <material>
+        <ambient>0.0 0.0 1.0 1</ambient>
+        <diffuse>0.0 0.0 1.0 1</diffuse>
+        <specular>0.0 0.0 1.0 1</specular>
+      </material>
     </visual>
 
-
-
-
-        <collision name='collision'>
-            <geometry>
-                <box>
-                    <size>2.0 1.0 0.5</size>
-                </box>
-            </geometry>
-        </collision>
-    </link>
-</model>
-
-
-
-
-# 4 Add a second link LEFT WHEEL
-
-
-<link name='left_wheel'>
-    <pose relative_to="chassis">-0.5 0.6 0 -1.5707 0 0</pose>
-    <inertial>
-        <mass>1</mass>
-        <inertia>
-            <ixx>0.043333</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.043333</iyy>
-            <iyz>0</iyz>
-            <izz>0.08</izz>
-        </inertia>
-    </inertial>
-
-
-
-# 5 also add VISUAL COLLISION
-
-
-
-    <visual name='visual'>
-        <geometry>
-            <cylinder>
-                <radius>0.4</radius>
-                <length>0.2</length>
-            </cylinder>
-        </geometry>
-        <material>
-            <ambient>1.0 0.0 0.0 1</ambient>
-            <diffuse>1.0 0.0 0.0 1</diffuse>
-            <specular>1.0 0.0 0.0 1</specular>
-        </material>
-    </visual>
     <collision name='collision'>
-        <geometry>
-            <cylinder>
-                <radius>0.4</radius>
-                <length>0.2</length>
-            </cylinder>
-        </geometry>
+      <geometry>
+        <box>
+          <size>2.0 1.0 0.5</size>
+        </box>
+      </geometry>
     </collision>
+  </link>
+</model>
+```
+
+---
+
+# 5) Add a second link: LEFT WHEEL
+
+```xml
+<link name='left_wheel'>
+  <pose relative_to="chassis">-0.5 0.6 0 -1.5707 0 0</pose>
+  <inertial>
+    <mass>1</mass>
+    <inertia>
+      <ixx>0.043333</ixx>
+      <ixy>0</ixy>
+      <ixz>0</ixz>
+      <iyy>0.043333</iyy>
+      <iyz>0</iyz>
+      <izz>0.08</izz>
+    </inertia>
+  </inertial>
+```
+
+---
+
+# 6) Add VISUAL + COLLISION for LEFT WHEEL
+
+```xml
+  <visual name='visual'>
+    <geometry>
+      <cylinder>
+        <radius>0.4</radius>
+        <length>0.2</length>
+      </cylinder>
+    </geometry>
+    <material>
+      <ambient>1.0 0.0 0.0 1</ambient>
+      <diffuse>1.0 0.0 0.0 1</diffuse>
+      <specular>1.0 0.0 0.0 1</specular>
+    </material>
+  </visual>
+
+  <collision name='collision'>
+    <geometry>
+      <cylinder>
+        <radius>0.4</radius>
+        <length>0.2</length>
+      </cylinder>
+    </geometry>
+  </collision>
 </link>
+```
 
+---
 
+# 7) Add a third link: RIGHT WHEEL
 
-# 6 add a third link  Right Wheels
-
-
-
+```xml
 <!--The same as left wheel but with different position-->
 <link name='right_wheel'>
-    <pose relative_to="chassis">-0.5 -0.6 0 -1.5707 0 0</pose> <!--angles are in radian-->
-    <inertial>
-        <mass>1</mass>
-        <inertia>
-            <ixx>0.043333</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.043333</iyy>
-            <iyz>0</iyz>
-            <izz>0.08</izz>
-        </inertia>
-    </inertial>
-    <visual name='visual'>
-        <geometry>
-            <cylinder>
-                <radius>0.4</radius>
-                <length>0.2</length>
-            </cylinder>
-        </geometry>
-        <material>
-            <ambient>1.0 0.0 0.0 1</ambient>
-            <diffuse>1.0 0.0 0.0 1</diffuse>
-            <specular>1.0 0.0 0.0 1</specular>
-        </material>
-    </visual>
-    <collision name='collision'>
-        <geometry>
-            <cylinder>
-                <radius>0.4</radius>
-                <length>0.2</length>
-            </cylinder>
-        </geometry>
-    </collision>
+  <pose relative_to="chassis">-0.5 -0.6 0 -1.5707 0 0</pose> <!--angles are in radian-->
+  <inertial>
+    <mass>1</mass>
+    <inertia>
+      <ixx>0.043333</ixx>
+      <ixy>0</ixy>
+      <ixz>0</ixz>
+      <iyy>0.043333</iyy>
+      <iyz>0</iyz>
+      <izz>0.08</izz>
+    </inertia>
+  </inertial>
+
+  <visual name='visual'>
+    <geometry>
+      <cylinder>
+        <radius>0.4</radius>
+        <length>0.2</length>
+      </cylinder>
+    </geometry>
+    <material>
+      <ambient>1.0 0.0 0.0 1</ambient>
+      <diffuse>1.0 0.0 0.0 1</diffuse>
+      <specular>1.0 0.0 0.0 1</specular>
+    </material>
+  </visual>
+
+  <collision name='collision'>
+    <geometry>
+      <cylinder>
+        <radius>0.4</radius>
+        <length>0.2</length>
+      </cylinder>
+    </geometry>
+  </collision>
 </link>
+```
 
+---
 
-# 7 Defining A frame (this is jut a frame defined in space to help place links on it)
+# 8) Defining a frame (helper frame to place links)
 
-
+```xml
 <frame name="caster_frame" attached_to='chassis'>
-    <pose>0.8 0 -0.2 0 0 0</pose>
+  <pose>0.8 0 -0.2 0 0 0</pose>
 </frame>
+```
 
+---
 
-#8 Caster Wheels
+# 9) Caster Wheel link
 
+```xml
 <!--caster wheel-->
 <link name='caster'>
-    <pose relative_to='caster_frame'/>
-    <inertial>
-        <mass>1</mass>
-        <inertia>
-            <ixx>0.016</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.016</iyy>
-            <iyz>0</iyz>
-            <izz>0.016</izz>
-        </inertia>
-    </inertial>
-    <visual name='visual'>
-        <geometry>
-            <sphere>
-                <radius>0.2</radius>
-            </sphere>
-        </geometry>
-        <material>
-            <ambient>0.0 1 0.0 1</ambient>
-            <diffuse>0.0 1 0.0 1</diffuse>
-            <specular>0.0 1 0.0 1</specular>
-        </material>
-    </visual>
-    <collision name='collision'>
-        <geometry>
-            <sphere>
-                <radius>0.2</radius>
-            </sphere>
-        </geometry>
-    </collision>
+  <pose relative_to='caster_frame'/>
+  <inertial>
+    <mass>1</mass>
+    <inertia>
+      <ixx>0.016</ixx>
+      <ixy>0</ixy>
+      <ixz>0</ixz>
+      <iyy>0.016</iyy>
+      <iyz>0</iyz>
+      <izz>0.016</izz>
+    </inertia>
+  </inertial>
+
+  <visual name='visual'>
+    <geometry>
+      <sphere>
+        <radius>0.2</radius>
+      </sphere>
+    </geometry>
+    <material>
+      <ambient>0.0 1 0.0 1</ambient>
+      <diffuse>0.0 1 0.0 1</diffuse>
+      <specular>0.0 1 0.0 1</specular>
+    </material>
+  </visual>
+
+  <collision name='collision'>
+    <geometry>
+      <sphere>
+        <radius>0.2</radius>
+      </sphere>
+    </geometry>
+  </collision>
 </link>
+```
 
+---
 
-# 9 Add Joints, to define movements between the links
+# 10) Add Joints (define movements between links)
 
+## 10.1) Left wheel joint
 
+```xml
 <joint name='left_wheel_joint' type='revolute'>
-    <pose relative_to='left_wheel'/>
+  <pose relative_to='left_wheel'/>
+  <parent>chassis</parent>
+  <child>left_wheel</child>
 
-
- <parent>chassis</parent>
-    <child>left_wheel</child>
-
-
-    <axis>
-        <xyz expressed_in='__model__'>0 1 0</xyz> <!--can be defined as any frame or even arbitrary frames-->
-        <limit>
-            <lower>-1.79769e+308</lower>    <!--negative infinity-->
-            <upper>1.79769e+308</upper>     <!--positive infinity-->
-        </limit>
-    </axis>
+  <axis>
+    <xyz expressed_in='__model__'>0 1 0</xyz> <!--can be defined as any frame or even arbitrary frames-->
+    <limit>
+      <lower>-1.79769e+308</lower>    <!--negative infinity-->
+      <upper>1.79769e+308</upper>     <!--positive infinity-->
+    </limit>
+  </axis>
 </joint>
+```
 
+## 10.2) Right wheel joint
 
- # 10 Second Joint
+```xml
 <joint name='right_wheel_joint' type='revolute'>
-    <pose relative_to='right_wheel'/>
-    <parent>chassis</parent>
-    <child>right_wheel</child>
-    <axis>
-        <xyz expressed_in='__model__'>0 1 0</xyz>
-        <limit>
-            <lower>-1.79769e+308</lower>    <!--negative infinity-->
-            <upper>1.79769e+308</upper>     <!--positive infinity-->
-        </limit>
-    </axis>
+  <pose relative_to='right_wheel'/>
+  <parent>chassis</parent>
+  <child>right_wheel</child>
+
+  <axis>
+    <xyz expressed_in='__model__'>0 1 0</xyz>
+    <limit>
+      <lower>-1.79769e+308</lower>    <!--negative infinity-->
+      <upper>1.79769e+308</upper>     <!--positive infinity-->
+    </limit>
+  </axis>
 </joint>
+```
 
+## 10.3) Caster wheel joint
 
-# 11 third joint, Caster Wheel Joint
-
-
+```xml
 <joint name='caster_wheel' type='ball'>
-    <parent>chassis</parent>
-    <child>caster</child>
+  <parent>chassis</parent>
+  <child>caster</child>
 </joint>
+```
