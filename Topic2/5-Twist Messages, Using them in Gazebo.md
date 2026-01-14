@@ -28,26 +28,7 @@ angular:
 
 ---
 
-## 2. Odometry Message
-
-### In ROS 2
-- **Type:** `nav_msgs/msg/Odometry`
-- **Purpose:** Provides robot position and velocity estimates.
-- **Fields:**
-  - `header` → timestamp + frame id
-  - `pose` → position (x, y, z) + orientation (quaternion)
-  - `twist` → linear and angular velocity
-
-### In Gazebo (gz)
-- **Type:** `gz.msgs.Odometry`
-- Contains:
-  - `pose` → position + orientation
-  - `twist` → linear + angular velocity
-- Gazebo publishes it on topics like `/model/vehicle_blue/odometry`.
-
----
-
-## 3. Working with Topics in Gazebo
+## 2. Working with Topics in Gazebo
 
 ### List all topics
 ```bash
@@ -63,7 +44,7 @@ This will continuously print the odometry data published by Gazebo.
 
 ---
 
-## 4. Drive the Robot from Gazebo Terminal
+## 3. Drive the Robot from Gazebo Terminal
 
 You can publish directly to the velocity command topic in Gazebo.
 
