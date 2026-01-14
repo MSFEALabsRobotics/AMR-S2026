@@ -1,4 +1,4 @@
-# 1) Add NEW MODEL (The ROBOTS)
+# 1) Create an new .sdf file from template, and Add NEW MODEL (The ROBOTS)
 
 ```xml
 <model name='vehicle_blue' canonical_link='chassis'>
