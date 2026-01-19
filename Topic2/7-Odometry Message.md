@@ -1,9 +1,4 @@
-# ROS 2 ↔ Gazebo (gz) Bridging Tutorial: `/cmd_vel` and Odometry
-
-This short tutorial shows how to:
-1) Inspect Gazebo topics (gz)  
-2) Bridge `/cmd_vel` and `/model/<robot_name>/odometry` between Gazebo and ROS 2  
-3) Test commands and view odometry in ROS 2  
+# ROS 2 ↔ Gazebo (gz) Bridging: `/cmd_vel` and Odometry
 
 ---
 
@@ -76,26 +71,7 @@ Expected (at least):
 
 ---
 
-## 5. Velocity Command (`/cmd_vel`)
-
-- **Gazebo type:** `gz.msgs.Twist`  
-- **ROS 2 type:** `geometry_msgs/msg/Twist`
-
-**Fields (diff drive):**
-- `linear.x` → Forward/backward speed (m/s)  
-- `angular.z` → Rotation around vertical axis (rad/s)  
-- Other components usually `0`
-
-**Frame:** Robot frame
-
-### 5.1 Example command (publish at 10 Hz)
-```bash
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3}, angular: {z: 0.1}}" -r 10
-```
-
----
-
-## 6. Odometry Topic (`/model/<robot_name>/odometry`)
+## 5. Odometry Topic (`/model/<robot_name>/odometry`)
 
 - **Gazebo type:** `gz.msgs.Odometry`  
 - **ROS 2 type:** `nav_msgs/msg/Odometry`
