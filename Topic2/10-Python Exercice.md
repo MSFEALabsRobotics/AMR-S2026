@@ -132,28 +132,10 @@ if __name__ == '__main__':
 
 ---
 
-## How to Run (quick method)
+## Run the Code
 
-1) Make the script executable:
-```bash
-chmod +x timed_cmdvel_publisher.py
-```
-
-2) Run it:
-```bash
-ros2 run <your_package_name> timed_cmdvel_publisher
-```
-
-> If you are not using a package yet, you can run directly with:
 ```bash
 python3 timed_cmdvel_publisher.py
 ```
-(As long as your ROS 2 environment is sourced.)
 
----
 
-## Checklist
-- [ ] The robot moves forward for ~5 seconds  
-- [ ] Then rotates for ~5 seconds  
-- [ ] Then stops and stays stopped  
-- [ ] `/cmd_vel` shows changing values when you `ros2 topic echo /cmd_vel`  
