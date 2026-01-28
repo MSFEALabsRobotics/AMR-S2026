@@ -14,6 +14,8 @@ Draw samples from a Gaussian distribution and compare the histogram with the the
 
 <img width="478" height="82" alt="image" src="https://github.com/user-attachments/assets/705581f1-2fca-4959-8197-5369d81a1f44" />
 
+## Python Code
+```python
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -36,3 +38,5 @@ plt.xlabel("x")
 plt.ylabel("Density")
 plt.legend()
 plt.show()
+
+```
