@@ -11,6 +11,10 @@ Draw samples from a Gaussian distribution and compare the histogram with the the
 
 - **Why:** This illustrates how sampling from a distribution approximates its PDF.
 
+
+<img width="478" height="82" alt="image" src="https://github.com/user-attachments/assets/705581f1-2fca-4959-8197-5369d81a1f44" />
+
+
 ## Python Code
 ```python
 import numpy as np
@@ -24,7 +28,6 @@ x = np.random.normal(0, 1, 5000)
 # STEP 2: histogram of the samples
 plt.hist(x, bins=40, density=True, alpha=0.6, label="Histogram (samples)")
 
-<img width="478" height="82" alt="image" src="https://github.com/user-attachments/assets/705581f1-2fca-4959-8197-5369d81a1f44" />
 
 # STEP 3: theoretical PDF
 xs = np.linspace(-4, 4, 400) #linspace Creates an array of evenly spaced numbers
