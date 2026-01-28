@@ -14,22 +14,18 @@ Draw samples from a Gaussian distribution and compare the histogram with the the
 
 <img width="478" height="82" alt="image" src="https://github.com/user-attachments/assets/705581f1-2fca-4959-8197-5369d81a1f44" />
 
-
-## Python Code
-```python
 import numpy as np
 import matplotlib.pyplot as plt
 
 # STEP 1: generate random numbers from a normal distribution
 x = np.random.normal(0, 1, 5000)
-#density=True, data normalized, Area of histograms is 1
-#alpha = 0.6  transparency
+# mean 0, standard deviation 1, number of points 5000
 
 # STEP 2: histogram of the samples
 plt.hist(x, bins=40, density=True, alpha=0.6, label="Histogram (samples)")
+#40 buckets, density True to be concentrated around the mid value
 
-
-# STEP 3: theoretical PDF
+# STEP 3: theoretical PDF 
 xs = np.linspace(-4, 4, 400) #linspace Creates an array of evenly spaced numbers
 pdf = (1/np.sqrt(2*np.pi)) * np.exp(-xs**2 / 2)
 plt.plot(xs, pdf, 'r', label="PDF (theory)")
@@ -40,8 +36,3 @@ plt.xlabel("x")
 plt.ylabel("Density")
 plt.legend()
 plt.show()
-```
-
-## Reflection
-- The histogram approximates the bell curve of the normal distribution.
-- With larger sample size, the approximation improves.
