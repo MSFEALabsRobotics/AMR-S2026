@@ -2,10 +2,10 @@
 
 # Problem
 
-```
+
 <img width="385" height="207" alt="image" src="https://github.com/user-attachments/assets/a696a2e1-8937-4f3c-a2d9-0d3b51592fc8" />
 
-```
+
 
 ```python
 for t in range(1, T):
