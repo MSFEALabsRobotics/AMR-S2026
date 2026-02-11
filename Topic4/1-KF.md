@@ -3,29 +3,8 @@
 # Problem
 
 ```
-Exercise: 1D Kalman Filter (Robotics) + Plot 3 Gaussians
-Scenario
+<img width="385" height="207" alt="image" src="https://github.com/user-attachments/assets/a696a2e1-8937-4f3c-a2d9-0d3b51592fc8" />
 
-A robot moves along a straight line (1D).
-You estimate its position 
-𝑥
-x using:
-
-Odometry (motion model) with process noise 
-𝑄
-Q
-
-A position sensor (e.g., GPS/UWB/vision landmark) with measurement noise 
-𝑅
-R
-
-At each time step:
-
-Predict belief using motion
-
-Correct belief using measurement
-
-Plot prediction Gaussian, measurement Gaussian, and posterior Gaussian
 ```
 
 ```python
