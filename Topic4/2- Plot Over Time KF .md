@@ -1,4 +1,4 @@
-# Exercise 1 – Kalman Filter (1D Position Tracking)
+# Kalman Filter (1D Position Tracking)
 
 In this exercise, we implement a simple **Kalman Filter (KF)** to estimate the 1D position of a robot moving in a straight line.  
 
