@@ -1,3 +1,7 @@
+<img width="802" height="439" alt="image" src="https://github.com/user-attachments/assets/95d0cbe1-6bed-4bab-a8c0-3f181954b883" />
+
+
+
 # Exercise: 1D Kalman Filter (Robotics) + Plot 3 Gaussians
 ## Scenario
 
