@@ -1,3 +1,11 @@
+## Euler to Quaternions
+https://articulatedrobotics.xyz/tools/rotation-calculator/
+
+## Compare quaternions and euler
+https://quaternions.online/
+
+
+
 # RViz2 Particles Display with `PoseArray` (ROS 2)
 
 This mini tutorial shows how to **visualize a particle cloud in RViz2 without any sensors** by publishing a `geometry_msgs/PoseArray`.
