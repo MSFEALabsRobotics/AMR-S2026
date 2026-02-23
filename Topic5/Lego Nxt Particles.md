@@ -29,7 +29,40 @@ def h(x):
         raise ValueError("x is out of range [0, 400]")
 
 ```
-        
+
+
+<img width="448" height="341" alt="image" src="https://github.com/user-attachments/assets/548d6af9-c50b-4b93-b2ff-d59dad2f2f44" />
+
+# Plotting
+
+```python
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def h(x):
+    if 0 <= x < 200:
+        return 1.5
+    elif 200 <= x < 300:
+        return 3.0
+    elif 300 <= x <= 400:
+        return 2.0
+    else:
+        return np.nan  # out of range
+
+# sample x values
+xs = np.linspace(0, 400, 1000)
+ys = [h(x) for x in xs]
+
+plt.plot(xs, ys)
+plt.xlabel("x")
+plt.ylabel("h(x)")
+plt.title("Piecewise measurement map h(x)")
+plt.grid(True)
+plt.show()
+
+```
+
 # Particle Filter Representation
 ## Use M particles (e.g., 500–2000). Each particle x_t^[m] is a hypothesis of position.
 ## Maintain weights w_t^[m] that sum to 1.
