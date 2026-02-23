@@ -8,7 +8,28 @@
 
 <img width="554" height="400" alt="image" src="https://github.com/user-attachments/assets/fbbb45ea-3853-4578-83c0-7b9a8d73d0fd" />
 
+```python
 
+def h(x):
+
+    """
+    x in mm
+    h(x) in tiles (one tile is 40cm)
+
+    """
+    if 0 <= x < 200:
+        return 1.5
+    elif 200 <= x < 300:
+        return 3.0
+    elif 300 <= x <= 400:
+        return 2.0
+    elif 400 <= x <= 500:
+        return 1.5
+    else:
+        raise ValueError("x is out of range [0, 400]")
+
+```
+        
 # Particle Filter Representation
 ## Use M particles (e.g., 500–2000). Each particle x_t^[m] is a hypothesis of position.
 ## Maintain weights w_t^[m] that sum to 1.
