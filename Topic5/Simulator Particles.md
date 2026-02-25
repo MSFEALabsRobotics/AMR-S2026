@@ -8,7 +8,7 @@ Place this **under the `<model name="vehicle_blue">` tag** in your world or mode
 
 ```xml
 <frame name="lidar_frame" attached_to='chassis'>
-  <pose>0.8 0 0.5 0 0 0</pose>
+  <pose>0.8 0 0.5 0 0 1.5708</pose>
 </frame>
 ```
 
