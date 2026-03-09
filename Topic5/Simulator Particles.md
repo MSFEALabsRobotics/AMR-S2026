@@ -437,7 +437,8 @@ class RangeOdomPrinter(Node):
 
             # simple weight
             p["wi"] = 1.0 / (1.0 + Delta)
-
+            # p["wi"] = math.exp(-(Delta**2) / (2 * sigma**2))  # USUAL GAUSSAN STYLE FORMULA for WEIGHT Distribution
+            
         # normalize weights
         s = sum(p["wi"] for p in self.particles)
         if s > 0:
