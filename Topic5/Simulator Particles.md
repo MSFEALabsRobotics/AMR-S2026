@@ -319,4 +319,149 @@ if __name__ == '__main__':
 ```
 
 
+## 11 Python developped Code
+```python
+
+#!/usr/bin/env python3
+import rclpy
+from rclpy.node import Node
+from sensor_msgs.msg import LaserScan
+from nav_msgs.msg import Odometry
+import random
+import copy
+import math
+import matplotlib.pyplot as plt
+
+
+class ParticlePlotter:
+    def __init__(self):
+        plt.ion()
+        self.fig, self.ax = plt.subplots()
+        self.scat = None
+        self.ax.set_yticks([])
+        self.ax.set_xlabel("x position")
+        self.ax.set_title("Particles (dot size ~ weight)")
+
+    def update(self, particles):
+        xs = [p["xi"] for p in particles]
+        sizes = [max(10.0, p["wi"] * 5000.0) for p in particles]
+
+        if self.scat is None:
+            self.scat = self.ax.scatter(xs, [0]*len(xs), s=sizes)
+        else:
+            self.scat.set_offsets([[x, 0] for x in xs])
+            self.scat.set_sizes(sizes)
+
+        self.ax.set_xlim(0, 20)
+        self.fig.canvas.draw_idle()
+        plt.pause(0.001)
+
+
+def h_measured(x_robot):
+    if x_robot < 1.5:
+        return 2.05
+    elif x_robot < 3.6:
+        return 2.30
+    elif x_robot < 5.7:
+        return 2.00
+    elif x_robot < 7.5:
+        return 2.50
+    elif x_robot < 9.6:
+        return 2.15
+    elif x_robot < 11.7:
+        return 2.649
+    else:
+        return 5.0   # simpler than inf for PF
+
+
+class RangeOdomPrinter(Node):
+    def __init__(self):
+        super().__init__('range_odom_printer')
+        self.range = 0.0
+        self.odom = 0.0
+        self.prev_odom = 0.0
+
+        self.plotter = ParticlePlotter()
+
+        self.create_subscription(LaserScan, '/lidar', self.scan_cb, 10)
+        self.create_subscription(Odometry, '/model/vehicle_blue/odometry', self.odom_cb, 10)
+
+        # initialize filter
+        self.N = 10
+        self.xmin, self.xmax = 0.0, 20.0
+
+        self.particles = []
+        for i in range(self.N):
+            xi = random.uniform(self.xmin, self.xmax)
+            wi = 1.0 / self.N
+            self.particles.append({"xi": xi, "wi": wi})
+
+        self.start = copy.deepcopy(self.particles)
+
+        self.create_timer(0.1, self.mainloop)   # 10 Hz is enough
+
+    def scan_cb(self, msg: LaserScan):
+        if msg.ranges:
+            self.range = round(msg.ranges[0], 3)
+
+    def odom_cb(self, msg: Odometry):
+        self.odom = round(msg.pose.pose.position.x, 3)
+
+    def resample(self, particles):
+        weights = [p["wi"] for p in particles]
+        new_particles = random.choices(particles, weights=weights, k=len(particles)) # basic resampling out of the box
+
+        resampled = []
+        for p in new_particles:
+            resampled.append({
+                "xi": p["xi"],
+                "wi": 1.0 / len(particles)
+            })
+        return resampled
+
+    def mainloop(self):
+        print(self.odom, self.range)
+
+        delta_odom = self.odom - self.prev_odom
+        self.prev_odom = self.odom
+
+        # motion + measurement
+        for p, p0 in zip(self.particles, self.start):
+            # motion model
+            p["xi"] = p0["xi"] + delta_odom
+
+            # measurement difference
+            Delta = abs(self.range - h_measured(p["xi"]))
+
+            # simple weight
+            p["wi"] = 1.0 / (1.0 + Delta)
+            # p["wi"] = math.exp(-(Delta**2) / (2 * sigma**2))  # USUAL GAUSSAN STYLE FORMULA for WEIGHT Distribution
+                
+
+        # normalize weights
+        s = sum(p["wi"] for p in self.particles)
+        if s > 0:
+            for p in self.particles:
+                p["wi"] /= s
+
+        # resample
+        self.particles = self.resample(self.particles)
+
+        # update start for next iteration
+        self.start = copy.deepcopy(self.particles)
+
+        self.plotter.update(self.particles)
+
+
+def main():
+    rclpy.init()
+    node = RangeOdomPrinter()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
+```
 
