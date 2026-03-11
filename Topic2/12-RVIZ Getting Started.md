@@ -35,6 +35,17 @@ ros2 run ros_gz_bridge parameter_bridge \
 ```
 ---
 
+
+## 3.1 Add corresponding TF for the Lidar
+
+```bash
+ros2 run tf2_ros static_transform_publisher 0.8 0 0.5 0 0 0 vehicle_blue/chassis vehicle_blue/chassis/gpu_lidar
+```
+---
+
+
+
+
 ## 4. Check Available ROS 2 Topics
 List all topics:
 
