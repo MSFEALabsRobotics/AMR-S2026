@@ -1,3 +1,5 @@
+<img width="650" height="333" alt="image" src="https://github.com/user-attachments/assets/9a5201d4-5a5d-4222-986d-8f4bfcac8b56" />
+
 # GZ Sim GPS Sensor + ROS 2 Bridge Tutorial
 
 ## Goal
@@ -18,8 +20,8 @@ Inside your `<world>` tag, add:
 
 <spherical_coordinates>
     <surface_model>EARTH_WGS84</surface_model>
-    <latitude_deg>33.8938</latitude_deg>
-    <longitude_deg>35.5018</longitude_deg>
+    <latitude_deg>48.8575</latitude_deg>
+    <longitude_deg>2.3514</longitude_deg>
     <elevation>0</elevation>
     <heading_deg>0</heading_deg>
 </spherical_coordinates>
@@ -29,7 +31,7 @@ Inside your `<world>` tag, add:
 
 * The **NavSat system** enables GPS-like sensors in the world.
 * The **spherical coordinates** define the world origin as a real Earth location.
-* In this example, the origin is set near **Beirut**.
+* In this example, the origin is set near **Paris**.
 
 ---
 
