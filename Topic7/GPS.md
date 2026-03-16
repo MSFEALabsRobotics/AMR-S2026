@@ -1,4 +1,5 @@
 <img width="650" height="333" alt="image" src="https://github.com/user-attachments/assets/9a5201d4-5a5d-4222-986d-8f4bfcac8b56" />
+<img width="642" height="521" alt="image" src="https://github.com/user-attachments/assets/25af2199-76fe-445a-85ec-848b8db560a7" />
 
 # GZ Sim GPS Sensor + ROS 2 Bridge Tutorial
 
