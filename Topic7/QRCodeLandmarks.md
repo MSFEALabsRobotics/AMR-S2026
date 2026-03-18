@@ -1,3 +1,6 @@
+<img width="770" height="596" alt="image" src="https://github.com/user-attachments/assets/4b809d8b-6737-4932-96e4-3d06b7805a02" />
+
+
 # QR Code Detection and Gazebo QR Tutorial
 
 ## 1) Detect a QR code in Python using OpenCV (`cv2`)
