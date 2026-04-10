@@ -7,7 +7,7 @@ sudo apt install ros-<ros2-distro>-nav2-bringup
 
 ros jazzy
 
-to start Localization
+# Localization
 ```bash
 source /opt/ros/<ros2-distro>/setup.bash
 ros2 launch nav2_bringup tb3_simulation_launch.py slam:=False headless:=False
@@ -27,7 +27,7 @@ ros2 topic info /map          # shows type (e.g., nav_msgs/msg/OccupancyGrid)
 ros2 interface show nav_msgs/msg/OccupancyGrid   # view fields
 ```
 
-# MAPPTING
+# MAPPING
 
 ## 1. Build the map (SLAM mode)
 
