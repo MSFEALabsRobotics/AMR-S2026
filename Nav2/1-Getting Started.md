@@ -7,10 +7,10 @@ sudo apt install ros-<ros2-distro>-nav2-bringup
 
 ros jazzy
 
-to start slam (mapping, and localizing)
+to start Localization
 ```bash
 source /opt/ros/<ros2-distro>/setup.bash
-ros2 launch nav2_bringup tb3_simulation_launch.py slam:=True headless:=False
+ros2 launch nav2_bringup tb3_simulation_launch.py slam:=False headless:=False
 ```
 
 
@@ -27,87 +27,40 @@ ros2 topic info /map          # shows type (e.g., nav_msgs/msg/OccupancyGrid)
 ros2 interface show nav_msgs/msg/OccupancyGrid   # view fields
 ```
 
-## Message Type: `nav_msgs/OccupancyGrid`
+# MAPPTING
 
-### header
-- **frame_id**: typically "map" (the fixed world frame).
-- **stamp**: time the map corresponds to.
+## 1. Build the map (SLAM mode)
 
-### info (`nav_msgs/MapMetaData`)
-- **resolution** (float32): meters per cell (e.g., 0.05 → each pixel is 5 cm).
-- **width, height** (uint32): number of cells (columns, rows).
-- **origin** (`geometry_msgs/Pose`): pose of the cell (0,0) (bottom-left of the grid array) in the map frame.
-  - **origin.position.x/y**: world coordinates (meters) of the lower-left corner.
-  - **origin.orientation**: rotation of the grid w.r.t. the map frame (usually identity; if the map is rotated, it’s a quaternion).
+Start the TB3 sim with SLAM enabled:
 
-### data (flattened row-major `int8` array)
-- **Length** = `width * height`.
-- Each cell is:
-  - **-1** → unknown
-  - **0..100** → occupancy probability in %, where higher = more likely **occupied**
-- Conventionally, planners threshold around **50** (free < 50, occupied ≥ 50).
+```bash
+ros2 launch nav2_bringup tb3_simulation_launch.py slam:=True headless:=False
+```
+
+Drive the robot around until you are happy with the map, then save it:
+
+```bash
+ros2 run nav2_map_server map_saver_cli -f my_maze
+```
+
+This creates two files in the current folder:
+
+- `my_maze.pgm`
+- `my_maze.yaml`
+
+These are your static map.
 
 ---
 
-## Python: Display One Map From `/map`
-Subscribes to `/map` and shows one occupancy grid frame.
+## 2. Later: use the saved map for localization (no SLAM)
 
-```python
-# map_show_once.py
-import rclpy
-from rclpy.node import Node
-from nav_msgs.msg import OccupancyGrid
-import numpy as np
-import matplotlib.pyplot as plt
+Next time, you don’t run SLAM; you start Nav2 in localization mode with the saved map:
 
-class MapOnce(Node):
-    def __init__(self):
-        super().__init__('map_show_once')
-        self.sub = self.create_subscription(OccupancyGrid, '/map', self.cb, 10)
-        self.img = None
-        self.meta = None
-
-    def cb(self, msg: OccupancyGrid):
-        # Convert occupancy grid -> displayable image
-        w, h = msg.info.width, msg.info.height
-        data = np.array(msg.data, dtype=np.int16).reshape(h, w)
-
-        img = np.zeros_like(data, dtype=np.uint8)
-        img[data == -1] = 127              # unknown
-        img[(data >= 0) & (data < 50)] = 255  # free
-        img[data >= 50] = 0                # occupied
-
-        self.img  = np.flipud(img)  # flip to match RViz view
-        self.meta = (w, h, msg.info.resolution)
-
-def main():
-    rclpy.init()
-    node = MapOnce()
-
-    # Spin until the first map arrives
-    while rclpy.ok() and node.img is None:
-        rclpy.spin_once(node, timeout_sec=0.5)
-
-    rclpy.shutdown()
-
-    if node.img is None:
-        print("No /map received.")
-        return
-
-    w, h, res = node.meta
-    plt.figure("Occupancy Grid (/map)")
-    plt.imshow(node.img, cmap='gray', origin='upper')
-    plt.title(f"size: {w}x{h}, res: {res:.3f} m/px")
-    plt.axis('off')
-    plt.tight_layout()
-    plt.show()  # blocks until you close the window
-
-if __name__ == '__main__':
-    main()
-```
-
-### Run
 ```bash
-source /opt/ros/jazzy/setup.bash
-python3 map_show_once.py
+ros2 launch nav2_bringup tb3_simulation_launch.py   slam:=False headless:=Flase  map:=/full/path/to/my_maze.yaml
 ```
+
+Then in RViz:
+
+1. Use **2D Pose Estimate** to set the initial robot pose on the map.
+2. Use **Nav2 Goal** to send a goal; the robot should localize and navigate using `my_maze`.
