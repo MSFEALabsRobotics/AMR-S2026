@@ -1,3 +1,6 @@
+<img width="666" height="612" alt="image" src="https://github.com/user-attachments/assets/ced2ace9-e976-4fa0-a31b-91f21a743c2f" />
+
+
 # Occupancy Grid Mapping in ROS 2
 
 ## Exercise Title
