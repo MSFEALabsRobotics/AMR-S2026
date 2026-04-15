@@ -1,457 +1,475 @@
-# Occupancy Grid Mapping in ROS 2 — In-Class Solution
+# Occupancy Grid Mapping in ROS 2
 
-## Goal
+## Exercise Title
 
-Build a simple **2D occupancy grid map** using:
+Occupancy Grid Mapping Using LiDAR and Odometry in ROS 2
 
-* `/scan` from LiDAR
-* `/odom` from odometry
+## Objective
 
-and publish:
+In this exercise, you will build a **2D occupancy grid map** of an environment using:
 
-* `/map` as `nav_msgs/msg/OccupancyGrid`
+* **LiDAR measurements**
+* **Robot odometry**
 
-This is **not SLAM**. We assume the robot pose is already known from odometry.
+You are **not required to use Nav2**.
 
----
+The robot pose is assumed to be known from odometry, and your task is to construct a map showing:
 
-## Main Idea
-
-For each laser beam:
-
-1. get the robot pose `(x_r, y_r, theta)`
-2. compute the beam endpoint in world coordinates
-3. convert robot position and endpoint into grid cells
-4. mark all cells along the beam as **free**
-5. mark the last cell as **occupied**
+* **occupied cells**
+* **free cells**
+* **unknown cells**
 
 ---
 
-## ROS 2 Messages Used
+## Background
 
-### Inputs
+An occupancy grid map divides the environment into a rectangular grid of small cells.
 
-* `sensor_msgs/msg/LaserScan`
-* `nav_msgs/msg/Odometry`
+Each cell stores information about whether that part of the environment is:
 
-### Output
+* occupied by an obstacle
+* free space
+* still unknown
 
-* `nav_msgs/msg/OccupancyGrid`
+This is one of the most common map representations in mobile robotics.
+
+In this exercise:
+
+* the robot moves in Gazebo
+* LiDAR provides range measurements
+* odometry provides the robot pose
+* your node updates a grid map and publishes it as a ROS 2 topic
 
 ---
 
-## Occupancy Grid Convention
+## ROS 2 Topics
 
-In ROS occupancy grids:
+You may assume the simulator already provides:
+
+* `/scan` of type `sensor_msgs/msg/LaserScan`
+* `/odom` of type `nav_msgs/msg/Odometry`
+
+Your node should publish:
+
+* `/map` of type `nav_msgs/msg/OccupancyGrid`
+
+---
+
+## What Is an Occupancy Grid Map?
+
+A 2D occupancy grid is a matrix.
+
+Each cell corresponds to a small square region in the world.
+
+For example, if:
+
+* map resolution = `0.05 m/cell`
+* map width = `200 cells`
+* map height = `200 cells`
+
+then the represented physical area is:
+
+* `10 m x 10 m`
+
+Each cell can be stored as:
 
 * `-1` = unknown
 * `0` = free
 * `100` = occupied
 
-In this solution, we keep an internal 2D grid using these same values.
+This is the convention used by `nav_msgs/OccupancyGrid`.
 
 ---
 
-## Map Parameters
+## Main Idea of the Algorithm
 
-Example map settings:
+For each LiDAR beam:
 
-```python
-resolution = 0.05   # meters per cell
-width = 200         # number of columns
-height = 200        # number of rows
-origin_x = -5.0     # world x of map corner
-origin_y = -5.0     # world y of map corner
-```
+1. get the robot pose from odometry
+2. compute the beam angle in the world frame
+3. compute the beam endpoint
+4. mark the cells **along the beam** as free
+5. mark the **last cell** at the obstacle location as occupied
 
-This gives a map covering:
+Repeat this continuously while the robot moves.
+
+Over time, the map becomes more complete.
+
+---
+
+## Coordinate Frames
+
+You will work mainly with two coordinate systems:
+
+### 1. World coordinates
+
+These are continuous coordinates in meters:
+
+* `x`
+* `y`
+
+### 2. Grid coordinates
+
+These are integer cell indices:
+
+* `i`
+* `j`
+
+You need a conversion between the two.
+
+If the map origin is `(x_min, y_min)`, then:
 
 ```text
-10 m x 10 m
+j = floor((x - x_min) / resolution)
+i = floor((y - y_min) / resolution)
 ```
+
+Here:
+
+* `j` is the column index
+* `i` is the row index
 
 ---
 
-## Coordinate Conversion
+## Robot Pose from Odometry
 
-To convert world coordinates `(x, y)` into grid indices `(row, col)`:
+From `/odom`, extract:
 
-```python
-col = int((x - origin_x) / resolution)
-row = int((y - origin_y) / resolution)
-```
+* robot position: `x_r`, `y_r`
+* robot orientation: yaw angle `theta`
+
+The yaw angle is obtained from the quaternion in the odometry message.
 
 ---
 
-## Beam Endpoint
+## LiDAR Beam Model
 
-If:
+From `LaserScan`, each beam has:
 
-* robot pose is `(x_r, y_r, theta)`
-* beam angle in robot frame is `phi`
-* beam range is `r`
+* range `r`
+* angle relative to robot frame
 
-then:
+If the beam angle in robot frame is `phi`, then the beam angle in the world frame is:
 
-```python
+```text
 global_angle = theta + phi
-x_end = x_r + r * math.cos(global_angle)
-y_end = y_r + r * math.sin(global_angle)
 ```
+
+The endpoint of the beam is:
+
+```text
+x_end = x_r + r * cos(global_angle)
+y_end = y_r + r * sin(global_angle)
+```
+
+---
+
+## How to Update the Grid
+
+### Free cells
+
+All cells between the robot and the measured obstacle are considered **free**.
+
+### Occupied cell
+
+The cell at the end of the beam is considered **occupied**, provided that:
+
+* the range is valid
+* the range is smaller than `range_max`
+
+### Unknown cells
+
+Cells never observed remain **unknown**.
 
 ---
 
 ## Ray Tracing
 
-We need all cells between:
+To mark all cells between the robot position and the beam endpoint, use a simple line traversal method.
 
-* robot cell
-* beam end cell
+The most common choice is:
 
-A simple way is to use **Bresenham’s line algorithm**.
+* **Bresenham line algorithm**
+
+This gives all grid cells crossed by the beam.
 
 Then:
 
-* all cells except the last one → free
-* last cell → occupied
+* all intermediate cells → free
+* final cell → occupied
 
 ---
 
-## Complete ROS 2 Python Solution
+## Simple Version of the Exercise
 
-```python
-#!/usr/bin/env python3
+A basic implementation can use direct assignment:
 
-import math
+* unknown = `-1`
+* free = `0`
+* occupied = `100`
 
-import rclpy
-from rclpy.node import Node
-
-from sensor_msgs.msg import LaserScan
-from nav_msgs.msg import Odometry, OccupancyGrid
-from geometry_msgs.msg import Pose
-
-
-def quaternion_to_yaw(q):
-    x = q.x
-    y = q.y
-    z = q.z
-    w = q.w
-
-    siny_cosp = 2.0 * (w * z + x * y)
-    cosy_cosp = 1.0 - 2.0 * (y * y + z * z)
-    return math.atan2(siny_cosp, cosy_cosp)
-
-
-class OccupancyGridMapper(Node):
-    def __init__(self):
-        super().__init__('occupancy_grid_mapper')
-
-        # Map parameters
-        self.resolution = 0.05
-        self.width = 200
-        self.height = 200
-        self.origin_x = -5.0
-        self.origin_y = -5.0
-
-        # Internal map: start with unknown
-        self.grid = [-1] * (self.width * self.height)
-
-        # Latest robot pose
-        self.robot_x = None
-        self.robot_y = None
-        self.robot_yaw = None
-
-        # Subscribers
-        self.scan_sub = self.create_subscription(
-            LaserScan,
-            '/scan',
-            self.scan_callback,
-            10
-        )
-
-        self.odom_sub = self.create_subscription(
-            Odometry,
-            '/odom',
-            self.odom_callback,
-            10
-        )
-
-        # Publisher
-        self.map_pub = self.create_publisher(OccupancyGrid, '/map', 10)
-
-        # Timer for publishing map
-        self.timer = self.create_timer(0.5, self.publish_map)
-
-        self.get_logger().info('Occupancy grid mapper started.')
-
-    def odom_callback(self, msg: Odometry):
-        self.robot_x = msg.pose.pose.position.x
-        self.robot_y = msg.pose.pose.position.y
-        self.robot_yaw = quaternion_to_yaw(msg.pose.pose.orientation)
-
-    def scan_callback(self, msg: LaserScan):
-        if self.robot_x is None:
-            return
-
-        angle = msg.angle_min
-
-        for r in msg.ranges:
-            if math.isinf(r) or math.isnan(r):
-                angle += msg.angle_increment
-                continue
-
-            if r < msg.range_min or r > msg.range_max:
-                angle += msg.angle_increment
-                continue
-
-            global_angle = self.robot_yaw + angle
-
-            x_end = self.robot_x + r * math.cos(global_angle)
-            y_end = self.robot_y + r * math.sin(global_angle)
-
-            start_cell = self.world_to_grid(self.robot_x, self.robot_y)
-            end_cell = self.world_to_grid(x_end, y_end)
-
-            if start_cell is None or end_cell is None:
-                angle += msg.angle_increment
-                continue
-
-            cells = self.bresenham(
-                start_cell[1], start_cell[0],
-                end_cell[1], end_cell[0]
-            )
-
-            if len(cells) == 0:
-                angle += msg.angle_increment
-                continue
-
-            # Mark free cells along the ray, excluding last cell
-            for row, col in cells[:-1]:
-                self.set_cell(row, col, 0)
-
-            # Mark endpoint occupied
-            self.set_cell(cells[-1][0], cells[-1][1], 100)
-
-            angle += msg.angle_increment
-
-    def world_to_grid(self, x, y):
-        col = int((x - self.origin_x) / self.resolution)
-        row = int((y - self.origin_y) / self.resolution)
-
-        if row < 0 or row >= self.height or col < 0 or col >= self.width:
-            return None
-
-        return (row, col)
-
-    def set_cell(self, row, col, value):
-        if row < 0 or row >= self.height or col < 0 or col >= self.width:
-            return
-
-        idx = row * self.width + col
-
-        # Simple rule:
-        # occupied has priority over free
-        if value == 100:
-            self.grid[idx] = 100
-        elif value == 0 and self.grid[idx] != 100:
-            self.grid[idx] = 0
-
-    def bresenham(self, x0, y0, x1, y1):
-        cells = []
-
-        dx = abs(x1 - x0)
-        dy = abs(y1 - y0)
-        sx = 1 if x0 < x1 else -1
-        sy = 1 if y0 < y1 else -1
-        err = dx - dy
-
-        x, y = x0, y0
-
-        while True:
-            cells.append((y, x))
-            if x == x1 and y == y1:
-                break
-            e2 = 2 * err
-            if e2 > -dy:
-                err -= dy
-                x += sx
-            if e2 < dx:
-                err += dx
-                y += sy
-
-        return cells
-
-    def publish_map(self):
-        msg = OccupancyGrid()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'odom'
-
-        msg.info.resolution = self.resolution
-        msg.info.width = self.width
-        msg.info.height = self.height
-
-        msg.info.origin = Pose()
-        msg.info.origin.position.x = self.origin_x
-        msg.info.origin.position.y = self.origin_y
-        msg.info.origin.position.z = 0.0
-        msg.info.origin.orientation.w = 1.0
-
-        msg.data = self.grid
-        self.map_pub.publish(msg)
-
-
-def main(args=None):
-    rclpy.init(args=args)
-    node = OccupancyGridMapper()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
-
-
-if __name__ == '__main__':
-    main()
-```
+This is easy to implement, but it has one limitation:
+repeated measurements do not accumulate confidence.
 
 ---
 
-## How the Code Works
+## Better Version: Probabilistic Update
 
-### 1. Odometry callback
+A better map stores an internal probability or log-odds value for each cell.
 
-Stores the latest robot pose:
+Example idea:
 
-* `x`
-* `y`
-* `yaw`
+* if a beam passes through a cell → decrease occupancy belief
+* if a beam ends in a cell → increase occupancy belief
 
-### 2. Scan callback
+Then convert to ROS occupancy values when publishing.
 
-For every valid LiDAR range:
+For example:
 
-* computes the beam endpoint
-* converts start and end into grid cells
-* finds all crossed cells using Bresenham
-* marks intermediate cells as free
-* marks the last cell as occupied
-
-### 3. Map publisher
-
-Publishes the current grid as a ROS occupancy grid.
+* high probability of obstacle → `100`
+* low probability of obstacle → `0`
+* uncertain value → `-1` or intermediate value
 
 ---
 
-## Important Note About Frame Choice
+## Suggested Internal Representation
 
-In this example, the map is published in the `odom` frame:
+Use an internal 2D array of floating-point values.
 
-```python
-msg.header.frame_id = 'odom'
-```
+Two options:
 
-This is acceptable here because the exercise assumes odometry gives the robot pose directly in the same world used for mapping.
+### Option 1: probability
 
----
+Each cell stores a value between `0` and `1`.
 
-## Running the Node
+### Option 2: log-odds
 
-After adding the file to your ROS 2 Python package:
+Each cell stores a log-odds score.
 
-```bash
-chmod +x occupancy_grid_mapper.py
-```
+This is usually more convenient because updates are additive.
 
-Then run:
-
-```bash
-ros2 run your_package_name occupancy_grid_mapper
-```
-
----
-
-## RViz
-
-In RViz, add:
-
-* `Map`
-* topic: `/map`
-* fixed frame: `odom`
-
-You should see:
-
-* walls becoming occupied
-* empty space becoming free
-* unexplored zones remaining unknown
-
----
-
-## Limitations of This Simple Solution
-
-This is a basic classroom solution.
-
-Limitations:
-
-* no probabilistic update
-* no log-odds
-* free cells can be overwritten many times
-* if odometry drifts, the map will distort
-* dynamic obstacles are not handled
-
----
-
-## Better Version for Discussion
-
-A better implementation would store a floating-point belief per cell using log-odds:
+Example:
 
 ```text
-L(cell) = L(cell) + L_free
-L(cell) = L(cell) + L_occ
+L(cell) = L(cell) + L_occ   if occupied
+L(cell) = L(cell) + L_free  if free
 ```
 
-Then convert to ROS values only during publishing.
+where:
 
-But for class, the above direct version is simple and very clear.
+* `L_occ` is positive
+* `L_free` is negative
 
----
-
-## In-Class Summary
-
-### Inputs
-
-* LiDAR scan
-* robot odometry
-
-### Process
-
-* convert scan beam to endpoint
-* trace cells along the beam
-* set free cells
-* set occupied endpoint
-
-### Output
-
-* publish occupancy grid map
+Then clamp values to avoid very large magnitude.
 
 ---
 
-## Very Short Pseudocode
+## Publishing the Map
+
+Your node must publish a `nav_msgs/msg/OccupancyGrid` message.
+
+Important fields include:
+
+* header
+* info.resolution
+* info.width
+* info.height
+* info.origin
+* data
+
+The `data` field is a 1D array, so your 2D grid must be flattened.
+
+Typical flattening:
 
 ```text
-for each scan beam:
-    get range r and angle phi
-    compute endpoint in world
-    convert robot and endpoint to grid cells
-    trace line between them
-    mark line cells as free
-    mark final cell as occupied
+index = i * width + j
+```
+
+---
+
+## Suggested Node Structure
+
+Your ROS 2 node may contain:
+
+* subscriber to `/scan`
+* subscriber to `/odom`
+* publisher to `/map`
+* map array
+* latest robot pose
+
+Typical logic:
+
+1. receive odometry and store latest pose
+2. receive LiDAR scan
+3. process each valid beam
+4. update the internal grid
+5. publish updated occupancy grid
+
+---
+
+## Recommended Simplifications
+
+To keep the exercise manageable, use the following assumptions:
+
+* 2D map only
+* robot moves on a flat floor
+* odometry is accurate enough
+* no SLAM required
+* LiDAR is mounted at the robot center
+* ignore dynamic obstacles
+
+---
+
+## Parameters Students Should Define
+
+Students should choose and justify:
+
+* map resolution
+* map width and height
+* map origin
+* update rate
+* occupied threshold
+* free threshold
+* valid LiDAR range limits
+
+Example values:
+
+```text
+resolution = 0.05 m/cell
+width = 200
+height = 200
+origin = (-5.0, -5.0)
+```
+
+---
+
+## Expected Result
+
+When visualized in RViz, the map should gradually show:
+
+* walls as occupied regions
+* open floor as free regions
+* unexplored parts as unknown
+
+As the robot moves, more of the environment should become visible.
+
+---
+
+## Deliverables
+
+Each student or group should submit:
+
+1. ROS 2 package
+2. mapping node source code
+3. short report
+4. screenshot of the final map in RViz
+5. short video or demo of the mapping process
+
+---
+
+## Suggested Tasks
+
+### Part A - Basic mapping
+
+Implement an occupancy grid mapper using:
+
+* `/scan`
+* `/odom`
+* direct free/occupied marking
+
+### Part B - Probabilistic improvement
+
+Improve the map by using:
+
+* probability or log-odds updates
+* repeated evidence accumulation
+
+### Part C - Analysis
+
+Comment on:
+
+* map quality
+* effect of resolution
+* effect of odometry drift
+* effect of LiDAR noise
+
+---
+
+## Bonus Ideas
+
+Optional extensions:
+
+* use Bresenham line tracing
+* use log-odds instead of direct assignment
+* publish map at fixed timer rate
+* save the map to file
+* compare two map resolutions
+* inflate obstacles for safety margin
+
+---
+
+## Grading Suggestion
+
+### Implementation - 40%
+
+* node works correctly
+* subscribes and publishes correctly
+* map updates correctly
+
+### Mapping quality - 25%
+
+* obstacles appear correctly
+* free space is identified correctly
+* map is consistent
+
+### Code quality - 15%
+
+* clear structure
+* comments
+* readable implementation
+
+### Report - 10%
+
+* explanation of method
+* discussion of assumptions
+
+### Demo / visualization - 10%
+
+* RViz result shown clearly
+
+---
+
+## Important Note
+
+This exercise is **mapping with known pose**, not full SLAM.
+
+That means:
+
+* localization is assumed available from odometry
+* the main focus is the map construction process
+
+---
+
+## Very Short Algorithm Summary
+
+For every scan beam:
+
+```text
+get robot pose
+compute beam endpoint
+convert robot and endpoint to grid cells
+mark cells along the ray as free
+mark endpoint cell as occupied
 publish map
 ```
 
 ---
 
-## Suggested In-Class Extension
+## Suggested Next Step
 
-After showing this basic solution, a very good extension is:
+After this exercise, a natural continuation would be:
 
-* replace direct assignment with log-odds update
-* compare the quality of both maps
+* occupancy grid mapping with noisy pose
+* scan matching
+* SLAM
+* integration with navigation
