@@ -235,3 +235,67 @@ index = i * width + j
 ```
 
 ---
+
+
+```python
+#!/usr/bin/env python3
+
+import random
+import rclpy
+from rclpy.node import Node
+
+from nav_msgs.msg import OccupancyGrid
+from geometry_msgs.msg import Pose
+
+
+class EmptyMapPublisher(Node):
+    def __init__(self):
+        super().__init__('empty_map_publisher')
+
+        self.resolution = 0.05
+        self.width = 200
+        self.height = 200
+        self.origin_x = -5.0
+        self.origin_y = -5.0
+
+        self.grid = [-1] * (self.width * self.height)
+
+        self.map_pub = self.create_publisher(OccupancyGrid, '/map', 10)
+        self.timer = self.create_timer(0.5, self.publish_map)
+
+        self.get_logger().info('Empty map publisher started.')
+
+    def publish_map(self):
+        msg = OccupancyGrid()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = 'vehicle_blue/odom'
+
+        msg.info.resolution = self.resolution
+        msg.info.width = self.width
+        msg.info.height = self.height
+
+        msg.info.origin = Pose()
+        msg.info.origin.position.x = self.origin_x
+        msg.info.origin.position.y = self.origin_y
+        msg.info.origin.position.z = 0.0
+        msg.info.origin.orientation.w = 1.0
+
+        # Random Values
+        for _ in range(300): self.grid[random.randrange(len(self.grid))] = 0
+        for _ in range(300): self.grid[random.randrange(len(self.grid))] = 100
+
+        msg.data = self.grid
+        self.map_pub.publish(msg)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = EmptyMapPublisher()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
+```
