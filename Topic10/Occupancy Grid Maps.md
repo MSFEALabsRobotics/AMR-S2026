@@ -1,6 +1,13 @@
 <img width="666" height="612" alt="image" src="https://github.com/user-attachments/assets/ced2ace9-e976-4fa0-a31b-91f21a743c2f" />
 
 
+<img width="1016" height="659" alt="image" src="https://github.com/user-attachments/assets/f2e89ed6-74e9-41ba-bf8a-b1ec67b93a33" />
+
+# Map and odom
+*  ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map vehicle_blue/odom
+
+---
+
 # Occupancy Grid Mapping in ROS 2
 
 ## Exercise Title
@@ -271,7 +278,7 @@ class EmptyMapPublisher(Node):
     def publish_map(self):
         msg = OccupancyGrid()
         msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = 'vehicle_blue/odom'
+        msg.header.frame_id = 'map'
 
         msg.info.resolution = self.resolution
         msg.info.width = self.width
